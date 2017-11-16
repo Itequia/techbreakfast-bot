@@ -3,7 +3,12 @@ using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Web.Http;
+using Autofac;
+using Autofac.Integration.WebApi;
+using Itequia.TechBreakfast.Data;
+using Itequia.TechBreakfast.Dialogs;
 
 namespace Itequia.TechBreakfast
 {
@@ -21,8 +26,6 @@ namespace Itequia.TechBreakfast
                 Formatting = Newtonsoft.Json.Formatting.Indented,
                 NullValueHandling = NullValueHandling.Ignore,
             };
-
-            // Web API configuration and services
 
             // Web API routes
             config.MapHttpAttributeRoutes();

@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Itequia.TechBreakfast.Dialogs;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Connector;
 
@@ -20,7 +21,7 @@ namespace Itequia.TechBreakfast.Controllers
         {
             if (activity.Type == ActivityTypes.Message)
             {
-                await Conversation.SendAsync(activity, () => new Dialogs.RootDialog());
+                await Conversation.SendAsync(activity, () => new RootDialog());
             }
             else
             {
@@ -53,7 +54,7 @@ namespace Itequia.TechBreakfast.Controllers
                         {
                             if (newMember.Id == message.Recipient.Id) continue;
                             var reply = message.CreateReply();
-                            reply.Text = "¡Bienvenido a nuestra tienda online! \U0001F604 \n\n ¿Puedo ayudarte a gestionar tus pedidos?";
+                            reply.Text = "¡Bienvenido a nuestra tienda online! \U0001F604 \n\n ¿En qué puedo ayudarte?";
                             await client.Conversations.ReplyToActivityAsync(reply);
                         }
                     }
