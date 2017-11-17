@@ -34,17 +34,9 @@ namespace Itequia.TechBreakfast.Dialogs
         [LuisIntent("order.status")]
         public async Task OrderStatus(IDialogContext context, IAwaitable<IMessageActivity> message, LuisResult result)
         {
-            EntityRecommendation orderNumberRecommendation;
-
-            if (result.TryFindEntity(EntityOrderNumberName, out orderNumberRecommendation))
-            {
-
-            }
-            else
-            {
-                await context.PostAsync("¿Qué número de pedido deseas consultar?");
-                context.Wait(OrderNumberReceived);
-            }
+            result.TryFindEntity(EntityOrderNumberName, out var orderNumberRecommendation);
+            var messageToForward = await message;
+            context.Forward(new OrderStatusDialog(orderNumberRecommendation?.Entity), AfterDialog, messageToForward, CancellationToken.None);
         }
 
         [LuisIntent("help")]
@@ -68,31 +60,6 @@ namespace Itequia.TechBreakfast.Dialogs
         private async Task AfterDialog(IDialogContext context, IAwaitable<object> result)
         {
             context.Done<object>(null);
-        }
-
-        private async Task OrderNumberReceived(IDialogContext context, IAwaitable<object> result)
-        {
-            var activity = await result as Activity;
-            int orderNumber;
-            bool isNumeric = int.TryParse(activity.Text, out orderNumber);
-
-            if (isNumeric && MemoryStorage.Orders.Any(x => x.Id == orderNumber))
-            {
-                await context.Forward(new OrderStatusDialog(), AfterDialog, activity, CancellationToken.None);
-                return;
-            }
-            else if (MemoryStorage.Orders.Any())
-            {
-                await context.PostAsync("No tienes ningún pedido con ese número.");
-                await context.PostAsync("Estos son tus pedidos:");
-                await context.Forward(new ListOrdersDialog(), AfterDialog, activity, CancellationToken.None);
-                return;
-            }
-            else 
-            {
-                await context.PostAsync("No tienes ningún pedido con ese número.");
-                return;
-            }
         }
     }
 }
