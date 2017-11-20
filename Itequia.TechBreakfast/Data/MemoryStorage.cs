@@ -10,20 +10,15 @@ namespace Itequia.TechBreakfast.Data
     {
         public static List<Order> Orders = new List<Order>()
         {
-            new Order()
-            {
-                Id = 1,
-                Product = "Test product",
-                Date =  DateTime.Now,
-                Price = 25
-            },
-            new Order()
-            {
-                Id = 2,
-                Product = "Test product 2",
-                Date =  DateTime.Now,
-                Price = 225
-            }
+        };
+
+        public static Dictionary<string, string> Products = new Dictionary<string, string>()
+        {
+            { "Bicicleta", "bici.png" },
+            { "Palo de hockey", "hockey.png" },
+            { "Raqueta de tenis", "tenis.png" },
+            { "Bate de béisbol", "beisbol.png" },
+            { "Pelota de fútbol", "futbol.png" }
         };
 
         public static void AddOrder(Order order)

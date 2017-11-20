@@ -112,6 +112,11 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\beisbol.png" />
+    <Content Include="Content\bici.png" />
+    <Content Include="Content\futbol.png" />
+    <Content Include="Content\hockey.png" />
+    <Content Include="Content\tenis.png" />
     <Content Include="default.htm" />
     <Content Include="Global.asax" />
     <Content Include="Web.config">
@@ -124,7 +129,6 @@
     <Compile Include="Data\MemoryStorage.cs" />
     <Compile Include="Data\Models\Order.cs" />
     <Compile Include="Dialogs\CreateOrderDialog.cs" />
-    <Compile Include="Dialogs\OrderStatusDialog.cs" />
     <Compile Include="Dialogs\ListOrdersDialog.cs" />
     <Compile Include="Dialogs\RootDialog.cs" />
     <Compile Include="Global.asax.cs">
