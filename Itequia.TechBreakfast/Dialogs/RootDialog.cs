@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using Itequia.TechBreakfast.Data;
 using Itequia.TechBreakfast.Data.Models;
 using Microsoft.Bot.Builder.Dialogs;
@@ -18,6 +20,8 @@ namespace Itequia.TechBreakfast.Dialogs
     {
         private const string EntityOrderNumberName = "orderNumber";
         private const string EntityProductName = "product";
+
+        private Order _currentOrder;
 
         [LuisIntent("")]
         [LuisIntent("None")]
@@ -80,17 +84,68 @@ namespace Itequia.TechBreakfast.Dialogs
             var product = result != null ? productRecommendation?.Entity : msg.Text;
             if (!string.IsNullOrWhiteSpace(product))
             {
-                if (MemoryStorage.Products.All(p =>
-                    !string.Equals(p, product, StringComparison.CurrentCultureIgnoreCase)))
+                if (!MemoryStorage.Products.Any(p => p.Name.ToLower().Contains(product.ToLower())))
                 {
-                    await context.PostAsync($"Lo sentimos, el producto *{ product }* no se encuentra en stock");
+                    await context.PostAsync($"Lo sentimos, el producto *{product}* no se encuentra en stock.");
                     context.Done<object>(null);
+                }
+                else
+                {
+                    var selectedProduct =
+                        MemoryStorage.Products.First(p => p.Name.ToLower().Contains(product.ToLower()));
+
+                    PromptDialog.Confirm(
+                        context,
+                        AfterConfirmation,
+                        $"**Confirmación pedido** \n\n" +
+                        $"¿Desea comprar el producto *{selectedProduct.Name}* por un precio de **{selectedProduct.Price}€**?",
+                        options: new [] { "Sí", "No"}, patterns: new string[][] { new []{ "Sí", "Comprar", "Confirmar", "Aceptar", "sí", "comprar", "confirmar", "aceptar" }, new []{ "No", "Cancelar", "Atrás", "no", "cancelar", "atrás"} });
+
+                    _currentOrder = new Order()
+                    {
+                        Product = selectedProduct.Name,
+                        Date = DateTime.Now,
+                        Price = selectedProduct.Price
+                    };
                 }
             }
             else
             {
-                await context.PostAsync("¿Qué producto te gustaría comprar? \n\n Tenemos los siguientes en stock:");
-                context.Wait((ctx, mg) => OrderStatus(ctx, mg, null));
+                var reply = context.MakeMessage();
+                reply.Text = "¿Qué te gustaría comprar? \n\n Tenemos los siguientes productos en stock:";
+                reply.AttachmentLayout = AttachmentLayoutTypes.Carousel;
+                reply.Attachments = new List<Attachment>();
+
+                foreach (var stockProduct in MemoryStorage.Products)
+                {
+                    List<CardAction> cardButtons = new List<CardAction>();
+
+                    CardAction plButton = new CardAction()
+                    {
+                        Value = $"comprar {stockProduct.Name}",
+                        Type = "postBack",
+                        Title = "Comprar"
+                    };
+
+                    cardButtons.Add(plButton);
+
+                    byte[] imageBytes = File.ReadAllBytes(HttpContext.Current.Server.MapPath("~/Content/" + stockProduct.Image));
+                     
+                    ThumbnailCard plCard = new ThumbnailCard()
+                    {
+                        Title = stockProduct.Name,
+                        Subtitle = stockProduct.Price + "€",
+                        Text = stockProduct.Description,
+                        Images = new List<CardImage>() {  new CardImage() { Url = "data:image/png;base64," + Convert.ToBase64String(imageBytes) } },
+                        Buttons = cardButtons
+                    };
+
+                    Attachment plAttachment = plCard.ToAttachment();
+                    reply.Attachments.Add(plAttachment);
+                }
+
+                await context.PostAsync(reply, CancellationToken.None);
+                context.Done<object>(null);
             }
         }
 
@@ -114,6 +169,29 @@ namespace Itequia.TechBreakfast.Dialogs
         }
         private async Task AfterDialog(IDialogContext context, IAwaitable<object> result)
         {
+            context.Done<object>(null);
+        }
+
+        public async Task AfterConfirmation(IDialogContext context, IAwaitable<bool> argument)
+        {
+            var confirm = await argument;
+            if (confirm)
+            {
+                if (_currentOrder != null)
+                {
+                    MemoryStorage.AddOrder(_currentOrder);
+
+                    context.PostAsync(
+                        $"**¡Pedido realizado! \U0001F44D** \n\n Muchas gracias por su compra. \n\n Su nuevo pedido ha sido asignado con el identificador **{ _currentOrder.Id }**. Si lo desea, puede consultar su estado.");
+                }
+            }
+            else
+            {
+                context.PostAsync(
+                    "Ningún problema, hemos cancelado su pedido.");
+            }
+
+            _currentOrder = null;
             context.Done<object>(null);
         }
     }

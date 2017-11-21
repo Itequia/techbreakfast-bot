@@ -127,6 +127,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\MessagesController.cs" />
     <Compile Include="Data\MemoryStorage.cs" />
+    <Compile Include="Data\Models\Product.cs" />
     <Compile Include="Data\Models\Order.cs" />
     <Compile Include="Dialogs\CreateOrderDialog.cs" />
     <Compile Include="Dialogs\ListOrdersDialog.cs" />

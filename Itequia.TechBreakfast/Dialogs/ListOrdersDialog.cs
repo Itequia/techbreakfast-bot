@@ -49,7 +49,7 @@ namespace Itequia.TechBreakfast.Dialogs
                         {
                             new ReceiptItem() { Subtitle = order.Product }
                         },
-                        Total = order.Price.ToString() + " €",
+                        Total = order.Price.ToString() + "€",
                         Buttons = cardButtons
                     };
 
