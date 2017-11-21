@@ -27,7 +27,13 @@ namespace Itequia.TechBreakfast.Dialogs
         [LuisIntent("None")]
         public async Task None(IDialogContext context, IAwaitable<IMessageActivity> message, LuisResult result)
         {
-            await context.PostAsync("Lo siento, no te he entendido. Si lo necesitas, puedes pedirme ayuda.");
+            var msg = await message;
+            if (msg.Text.ToLower().Contains("hola") || msg.Text.ToLower().Contains("buenos días"))
+                await context.PostAsync("¡Bienvenido a nuestra tienda online! \U0001F604 \n\n ¿En qué puedo ayudarte?");
+            else
+                await context.PostAsync("Lo siento, no te he entendido. Si lo necesitas, puedes pedirme ayuda.");
+
+            context.Done<object>(null);
         }
 
         [LuisIntent("order.list")]
@@ -152,19 +158,28 @@ namespace Itequia.TechBreakfast.Dialogs
         [LuisIntent("help")]
         public async Task RequestHelp(IDialogContext context, IAwaitable<IMessageActivity> message, LuisResult result)
         {
-            var reply = context.MakeMessage();
-            reply.Text = "Puedo ayudarte con las siguientes tareas. ¿Qué deseas hacer?";
-            reply.SuggestedActions = new SuggestedActions()
-            {
-                Actions = new List<CardAction>()
-                {
-                    new CardAction { Title = "Ver pedidos", Type = ActionTypes.PostBack, Value = "Ver pedidos" },
-                    new CardAction { Title = "Consultar estado pedido", Type = ActionTypes.PostBack, Value = "Consultar estado pedido" },
-                    new CardAction { Title = "Crear nuevo pedido", Type = ActionTypes.PostBack, Value = "Crear nuevo pedido" }
-                }
-            };
+            var msg = await message;
+            if (msg.Text.ToLower().Contains("hola") || msg.Text.ToLower().Contains("buenos días"))
+                await context.PostAsync("¡Bienvenido a nuestra tienda online! \U0001F604 \n\n ¿En qué puedo ayudarte?");
 
-            await context.PostAsync(reply, CancellationToken.None);
+            else
+            {
+                var reply = context.MakeMessage();
+                reply.Text = "Puedo ayudarte con las siguientes tareas. ¿Qué deseas hacer?";
+                reply.SuggestedActions = new SuggestedActions()
+                {
+                    Actions = new List<CardAction>()
+                    {
+                        new CardAction { Title = "Ver pedidos", Type = ActionTypes.PostBack, Value = "Ver pedidos" },
+                        new CardAction { Title = "Consultar estado pedido", Type = ActionTypes.PostBack, Value = "Consultar estado pedido" },
+                        new CardAction { Title = "Crear nuevo pedido", Type = ActionTypes.PostBack, Value = "Crear nuevo pedido" }
+                    }
+                };
+
+                await context.PostAsync(reply, CancellationToken.None);
+
+            }
+
             context.Done(string.Empty);
         }
         private async Task AfterDialog(IDialogContext context, IAwaitable<object> result)
