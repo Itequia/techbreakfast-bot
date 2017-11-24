@@ -11,6 +11,7 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Luis;
 using Microsoft.Bot.Builder.Luis.Models;
 using Microsoft.Bot.Connector;
+using System.Text.RegularExpressions;
 
 namespace Itequia.TechBreakfast.Dialogs
 {
@@ -58,7 +59,8 @@ namespace Itequia.TechBreakfast.Dialogs
                 var orderNum = result != null ? orderNumberRecommendation?.Entity : msg.Text;
                 if (!string.IsNullOrWhiteSpace(orderNum))
                 {
-                    bool isNumeric = int.TryParse(orderNum, out var orderNumber);
+                    var resultString = Regex.Match(orderNum, @"\d+").Value;
+                    bool isNumeric = int.TryParse(resultString, out var orderNumber);
 
                     if (isNumeric && MemoryStorage.Orders.Any(x => x.Id == orderNumber))
                     {
@@ -113,7 +115,7 @@ namespace Itequia.TechBreakfast.Dialogs
                             AfterConfirmation,
                             $"**Confirmación pedido** \n\n" +
                             $"¿Desea comprar el producto *{selectedProduct.Name}* por un precio de **{selectedProduct.Price}€**?",
-                            options: new[] { "Sí", "No" }, patterns: new string[][] { new[] { "Sí", "Comprar", "Confirmar", "Aceptar", "sí", "comprar", "confirmar", "aceptar" }, new[] { "No", "Cancelar", "Atrás", "no", "cancelar", "atrás" } });
+                            options: new[] { "Sí", "No" }, patterns: new string[][] { new[] { "Sí", "Confirmar", "Aceptar", "sí", "confirmar", "aceptar" }, new[] { "No", "Cancelar", "Atrás", "no", "cancelar", "atrás" } });
 
                         _currentOrder = new Order()
                         {
