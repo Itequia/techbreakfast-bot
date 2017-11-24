@@ -1,0 +1,31 @@
+﻿@page
+@model VoiceModel
+@{
+	ViewData["Title"] = "Speech recognition";
+}
+
+<form>
+	@Html.AntiForgeryToken()
+	<div class="col-12">
+		<img class="logo" src="~/images/ITEQUIA_LOGO.jpg" width="250" />
+		<h1 class="header">Speech recognition demo</h1>
+		<h3 class="hashtag">#techbreakfast</h3>
+		<button id="recording-btn" type="button" class="btn btn-outline-danger" onclick="toggleRecord(this);" data-recording="false"><i class="fa fa-spinner fa-spin hidden"></i><span>Start recording</span></button>
+
+		<div id="success-recognition" class="hidden recognition-result">
+			Me gustaría comprar una bicicleta por favor	
+		</div>
+		<div id="fail-recognition" class="hidden recognition-result">			
+			Speech recognition failed, please try again
+		</div>
+	</div>
+</form>
+
+@section scripts {
+	<environment include="Development">
+		<script src="~/js/voice.js" asp-append-version="true"></script>
+	</environment>
+	<environment exclude="Development">
+		<script src="~/js/voice.min.js" asp-append-version="true"></script>
+	</environment>
+}

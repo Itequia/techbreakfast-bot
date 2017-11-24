@@ -9,11 +9,4 @@ function toggleChat() {
 	$('.logo').toggleClass('colapsed')
 	$('.chat-trigger').toggleClass('colapsed')
 	$chat.toggleClass('colapsed')
-
-
-	if ($chat.hasClass(".collapsed")) {
-		
-	} else {
-
-	}
 }

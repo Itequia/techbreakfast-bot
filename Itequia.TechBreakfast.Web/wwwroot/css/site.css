@@ -144,3 +144,48 @@ body {
         transform: translateY(-15px);
     }
 }
+
+#recording-btn {
+    position: absolute;
+    left: 135px;
+    top: 380px;
+
+    font-size: 18px;
+}
+
+.btn-outline-danger {
+    font-family: 'Roboto Condensed', sans-serif;
+    color: #dc3545;
+    background-color: transparent;
+    background-image: none;
+    border-color: #dc3545;
+
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    transition: all 0.3s ease;
+}
+
+    .btn-outline-danger:hover, .btn-outline-danger.active {
+        color: #ffffff;
+        background-color: #dc3545;
+    }
+
+
+#success-recognition, #fail-recognition {
+    position: absolute;
+    top: 460px;
+    left: 134px;
+    font-size: 26px;
+    font-weight: bold;
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+#success-recognition {
+    color: green;
+}
+
+#fail-recognition {
+    color: darkred;
+}
