@@ -1,0 +1,17 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Bot demo";
+}
+
+<div class="col-12">
+	<img class="logo" src="~/images/ITEQUIA_LOGO.jpg" width="250" />
+	<h1 class="header">Bot framework demo</h1>
+	<h3 class="hashtag">#techbreakfast</h3>
+</div>
+
+<div class="chat-trigger" onclick="toggleChat();">
+	<img src="~/images/chat.png" />
+</div>
+
+<iframe class="chat colapsed" src='https://webchat.botframework.com/embed/ItequiaTechBreakfastBot?s=3qpB-hc-LSQ.cwA.bxE.jdON3qtt0qVxJehhlcf-7kul2Dtl95KLNCX2lrYiG7I'></iframe>

@@ -46,18 +46,18 @@ namespace Itequia.TechBreakfast.Controllers
                     // Use Activity.MembersAdded and Activity.MembersRemoved and Activity.Action for info
                     // Not available in all channels
 
-                    IConversationUpdateActivity update = message;
-                    var client = new ConnectorClient(new Uri(message.ServiceUrl), new MicrosoftAppCredentials());
-                    if (update.MembersAdded != null && update.MembersAdded.Any())
-                    {
-                        foreach (var newMember in update.MembersAdded)
-                        {
-                            if (newMember.Id == message.Recipient.Id) continue;
-                            var reply = message.CreateReply();
-                            reply.Text = "¡Bienvenido a nuestra tienda online! \U0001F604 \n\n ¿En qué puedo ayudarte?";
-                            await client.Conversations.ReplyToActivityAsync(reply);
-                        }
-                    }
+                    //IConversationUpdateActivity update = message;
+                    //var client = new ConnectorClient(new Uri(message.ServiceUrl), new MicrosoftAppCredentials());
+                    //if (update.MembersAdded != null && update.MembersAdded.Any())
+                    //{
+                    //    foreach (var newMember in update.MembersAdded)
+                    //    {
+                    //        if (newMember.Id == message.Recipient.Id) continue;
+                    //        var reply = message.CreateReply();
+                    //        reply.Text = "¡Bienvenido a nuestra tienda online! \U0001F604 \n\n ¿En qué puedo ayudarte?";
+                    //        await client.Conversations.ReplyToActivityAsync(reply);
+                    //    }
+                    //}
                     break;
                 case ActivityTypes.ContactRelationUpdate:
                     // Handle add/remove from contact lists

@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2008
+VisualStudioVersion = 15.0.27004.2009
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itequia.TechBreakfast", "Itequia.TechBreakfast\Itequia.TechBreakfast.csproj", "{F867ED22-5285-483A-870D-B90FA0D1D6DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Itequia.TechBreakfast.Web", "Itequia.TechBreakfast.Web\Itequia.TechBreakfast.Web.csproj", "{05F99BD6-30B9-46EB-99EE-18E3BEA5AFDC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{F867ED22-5285-483A-870D-B90FA0D1D6DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F867ED22-5285-483A-870D-B90FA0D1D6DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F867ED22-5285-483A-870D-B90FA0D1D6DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05F99BD6-30B9-46EB-99EE-18E3BEA5AFDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05F99BD6-30B9-46EB-99EE-18E3BEA5AFDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05F99BD6-30B9-46EB-99EE-18E3BEA5AFDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05F99BD6-30B9-46EB-99EE-18E3BEA5AFDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

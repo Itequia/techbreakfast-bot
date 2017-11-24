@@ -27,142 +27,148 @@ namespace Itequia.TechBreakfast.Dialogs
         [LuisIntent("None")]
         public async Task None(IDialogContext context, IAwaitable<IMessageActivity> message, LuisResult result)
         {
-            var msg = await message;
-            if (msg.Text.ToLower().Contains("hola") || msg.Text.ToLower().Contains("buenos días"))
-                await context.PostAsync("¡Bienvenido a nuestra tienda online! \U0001F604 \n\n ¿En qué puedo ayudarte?");
-            else
+            if (!await CheckForWelcome(context, message))
+            {
                 await context.PostAsync("Lo siento, no te he entendido. Si lo necesitas, puedes pedirme ayuda.");
-
-            context.Done<object>(null);
+                context.Done<object>(null);
+            }
         }
 
         [LuisIntent("order.list")]
         public async Task ListOrders(IDialogContext context, IAwaitable<IMessageActivity> message, LuisResult result)
         {
-            var messageToForward = await message;
-            await context.Forward(new ListOrdersDialog(), AfterDialog, messageToForward, CancellationToken.None);
+            if (!await CheckForWelcome(context, message))
+            {
+                var messageToForward = await message;
+                await context.Forward(new ListOrdersDialog(), AfterDialog, messageToForward, CancellationToken.None);
+            }
+
         }
 
         [LuisIntent("order.status")]
         public async Task OrderStatus(IDialogContext context, IAwaitable<IMessageActivity> message, LuisResult result)
         {
-            EntityRecommendation orderNumberRecommendation = null;
-            if (result != null) result.TryFindEntity(EntityOrderNumberName, out orderNumberRecommendation);
-            var msg = await message;
 
-            var orderNum = result != null ? orderNumberRecommendation?.Entity : msg.Text;
-            if (!string.IsNullOrWhiteSpace(orderNum))
+            if (!await CheckForWelcome(context, message))
             {
-                bool isNumeric = int.TryParse(orderNum, out var orderNumber);
+                EntityRecommendation orderNumberRecommendation = null;
+                if (result != null) result.TryFindEntity(EntityOrderNumberName, out orderNumberRecommendation);
+                var msg = await message;
 
-                if (isNumeric && MemoryStorage.Orders.Any(x => x.Id == orderNumber))
+                var orderNum = result != null ? orderNumberRecommendation?.Entity : msg.Text;
+                if (!string.IsNullOrWhiteSpace(orderNum))
                 {
-                    Order order = MemoryStorage.Orders.First(x => x.Id == orderNumber);
-                    await context.PostAsync($"Tu pedido número **{order.Id}** se realizó el día {order.Date:dd/MM/yyyy HH:mm}.\n\n Se encuentra en estado: ***pendiente de envío***.");
-                    context.Done<object>(null);
-                }
-                else if (MemoryStorage.Orders.Any())
-                {
-                    await context.PostAsync("No tienes ningún pedido con ese número.");
-                    await context.Forward(new ListOrdersDialog(), AfterDialog, msg, CancellationToken.None);
+                    bool isNumeric = int.TryParse(orderNum, out var orderNumber);
+
+                    if (isNumeric && MemoryStorage.Orders.Any(x => x.Id == orderNumber))
+                    {
+                        Order order = MemoryStorage.Orders.First(x => x.Id == orderNumber);
+                        await context.PostAsync($"Tu pedido número **{order.Id}** se realizó el día {order.Date:dd/MM/yyyy HH:mm}.\n\n Se encuentra en estado: ***pendiente de envío***.");
+                        context.Done<object>(null);
+                    }
+                    else if (MemoryStorage.Orders.Any())
+                    {
+                        await context.PostAsync("No tienes ningún pedido con ese número.");
+                        await context.Forward(new ListOrdersDialog(), AfterDialog, msg, CancellationToken.None);
+                    }
+                    else
+                    {
+                        await context.PostAsync("No tienes ningún pedido con ese número.");
+                        context.Done<object>(null);
+                    }
                 }
                 else
                 {
-                    await context.PostAsync("No tienes ningún pedido con ese número.");
-                    context.Done<object>(null);
+                    await context.PostAsync("Introduce el número de pedido que deseas consultar");
+                    context.Wait((ctx, mg) => OrderStatus(ctx, mg, null));
                 }
-            }
-            else
-            {
-                await context.PostAsync("Introduce el número de pedido que deseas consultar");
-                context.Wait((ctx, mg) => OrderStatus(ctx, mg, null));
-            }
+            }           
         }
 
 
         [LuisIntent("order.create")]
         public async Task CreateOrder(IDialogContext context, IAwaitable<IMessageActivity> message, LuisResult result)
         {
-            EntityRecommendation productRecommendation = null;
-            if (result != null) result.TryFindEntity(EntityProductName, out productRecommendation);
-            var msg = await message;
-
-            var product = result != null ? productRecommendation?.Entity : msg.Text;
-            if (!string.IsNullOrWhiteSpace(product))
+            if (!await CheckForWelcome(context, message))
             {
-                if (!MemoryStorage.Products.Any(p => p.Name.ToLower().Contains(product.ToLower())))
+                EntityRecommendation productRecommendation = null;
+                if (result != null) result.TryFindEntity(EntityProductName, out productRecommendation);
+                var msg = await message;
+
+                var product = result != null ? productRecommendation?.Entity : msg.Text;
+                if (!string.IsNullOrWhiteSpace(product))
                 {
-                    await context.PostAsync($"Lo sentimos, el producto *{product}* no se encuentra en stock.");
-                    context.Done<object>(null);
+                    if (!MemoryStorage.Products.Any(p => p.Name.ToLower().Contains(product.ToLower())))
+                    {
+                        await context.PostAsync($"Lo sentimos, el producto *{product}* no se encuentra en stock.");
+                        context.Done<object>(null);
+                    }
+                    else
+                    {
+                        var selectedProduct =
+                            MemoryStorage.Products.First(p => p.Name.ToLower().Contains(product.ToLower()));
+
+                        PromptDialog.Confirm(
+                            context,
+                            AfterConfirmation,
+                            $"**Confirmación pedido** \n\n" +
+                            $"¿Desea comprar el producto *{selectedProduct.Name}* por un precio de **{selectedProduct.Price}€**?",
+                            options: new[] { "Sí", "No" }, patterns: new string[][] { new[] { "Sí", "Comprar", "Confirmar", "Aceptar", "sí", "comprar", "confirmar", "aceptar" }, new[] { "No", "Cancelar", "Atrás", "no", "cancelar", "atrás" } });
+
+                        _currentOrder = new Order()
+                        {
+                            Product = selectedProduct.Name,
+                            Date = DateTime.Now,
+                            Price = selectedProduct.Price
+                        };
+                    }
                 }
                 else
                 {
-                    var selectedProduct =
-                        MemoryStorage.Products.First(p => p.Name.ToLower().Contains(product.ToLower()));
+                    var reply = context.MakeMessage();
+                    reply.Text = "¿Qué te gustaría comprar? \n\n Tenemos los siguientes productos en stock:";
+                    reply.AttachmentLayout = AttachmentLayoutTypes.Carousel;
+                    reply.Attachments = new List<Attachment>();
 
-                    PromptDialog.Confirm(
-                        context,
-                        AfterConfirmation,
-                        $"**Confirmación pedido** \n\n" +
-                        $"¿Desea comprar el producto *{selectedProduct.Name}* por un precio de **{selectedProduct.Price}€**?",
-                        options: new [] { "Sí", "No"}, patterns: new string[][] { new []{ "Sí", "Comprar", "Confirmar", "Aceptar", "sí", "comprar", "confirmar", "aceptar" }, new []{ "No", "Cancelar", "Atrás", "no", "cancelar", "atrás"} });
-
-                    _currentOrder = new Order()
+                    foreach (var stockProduct in MemoryStorage.Products)
                     {
-                        Product = selectedProduct.Name,
-                        Date = DateTime.Now,
-                        Price = selectedProduct.Price
-                    };
+                        List<CardAction> cardButtons = new List<CardAction>();
+
+                        CardAction plButton = new CardAction()
+                        {
+                            Value = $"comprar {stockProduct.Name}",
+                            Type = "postBack",
+                            Title = "Comprar"
+                        };
+
+                        cardButtons.Add(plButton);
+
+                        byte[] imageBytes = File.ReadAllBytes(HttpContext.Current.Server.MapPath("~/Content/" + stockProduct.Image));
+
+                        ThumbnailCard plCard = new ThumbnailCard()
+                        {
+                            Title = stockProduct.Name,
+                            Subtitle = stockProduct.Price + "€",
+                            Text = stockProduct.Description,
+                            Images = new List<CardImage>() { new CardImage() { Url = "data:image/png;base64," + Convert.ToBase64String(imageBytes) } },
+                            Buttons = cardButtons
+                        };
+
+                        Attachment plAttachment = plCard.ToAttachment();
+                        reply.Attachments.Add(plAttachment);
+                    }
+
+                    await context.PostAsync(reply, CancellationToken.None);
+                    context.Done<object>(null);
                 }
             }
-            else
-            {
-                var reply = context.MakeMessage();
-                reply.Text = "¿Qué te gustaría comprar? \n\n Tenemos los siguientes productos en stock:";
-                reply.AttachmentLayout = AttachmentLayoutTypes.Carousel;
-                reply.Attachments = new List<Attachment>();
-
-                foreach (var stockProduct in MemoryStorage.Products)
-                {
-                    List<CardAction> cardButtons = new List<CardAction>();
-
-                    CardAction plButton = new CardAction()
-                    {
-                        Value = $"comprar {stockProduct.Name}",
-                        Type = "postBack",
-                        Title = "Comprar"
-                    };
-
-                    cardButtons.Add(plButton);
-
-                    byte[] imageBytes = File.ReadAllBytes(HttpContext.Current.Server.MapPath("~/Content/" + stockProduct.Image));
-                     
-                    ThumbnailCard plCard = new ThumbnailCard()
-                    {
-                        Title = stockProduct.Name,
-                        Subtitle = stockProduct.Price + "€",
-                        Text = stockProduct.Description,
-                        Images = new List<CardImage>() {  new CardImage() { Url = "data:image/png;base64," + Convert.ToBase64String(imageBytes) } },
-                        Buttons = cardButtons
-                    };
-
-                    Attachment plAttachment = plCard.ToAttachment();
-                    reply.Attachments.Add(plAttachment);
-                }
-
-                await context.PostAsync(reply, CancellationToken.None);
-                context.Done<object>(null);
-            }
+            
         }
 
         [LuisIntent("help")]
         public async Task RequestHelp(IDialogContext context, IAwaitable<IMessageActivity> message, LuisResult result)
         {
-            var msg = await message;
-            if (msg.Text.ToLower().Contains("hola") || msg.Text.ToLower().Contains("buenos días"))
-                await context.PostAsync("¡Bienvenido a nuestra tienda online! \U0001F604 \n\n ¿En qué puedo ayudarte?");
-
-            else
+            if (!await CheckForWelcome(context, message))
             {
                 var reply = context.MakeMessage();
                 reply.Text = "Puedo ayudarte con las siguientes tareas. ¿Qué deseas hacer?";
@@ -178,9 +184,21 @@ namespace Itequia.TechBreakfast.Dialogs
 
                 await context.PostAsync(reply, CancellationToken.None);
 
+                context.Done(string.Empty);
+            }
+        }
+
+        private async Task<bool> CheckForWelcome(IDialogContext context, IAwaitable<IMessageActivity> message)
+        {
+            var msg = await message;
+            if (msg.Text.ToLower().Contains("hola") || msg.Text.ToLower().Contains("buenos días"))
+            {
+                await context.PostAsync("¡Bienvenido a nuestra tienda online! \U0001F604 \n\n ¿En qué puedo ayudarte?");
+                context.Done<object>(null);
+                return true;
             }
 
-            context.Done(string.Empty);
+            return false;
         }
         private async Task AfterDialog(IDialogContext context, IAwaitable<object> result)
         {
