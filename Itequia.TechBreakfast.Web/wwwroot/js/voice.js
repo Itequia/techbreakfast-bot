@@ -1,7 +1,7 @@
 ﻿var audio_context;
 var recorder;
 
-window.onload = function init() {
+$(window).load(function() {
 	try {
 		// webkit shim
 		window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -12,16 +12,18 @@ window.onload = function init() {
 	} catch (e) {
 		alert('No web audio support in this browser!');
 	}
+	
 
 	navigator.getUserMedia({ audio: true }, startUserMedia, function (e) {
 	});
-};
+});
 
 function startUserMedia(stream) {
 	var input = audio_context.createMediaStreamSource(stream);
 	// Uncomment if you want the audio to feedback directly
 	//input.connect(audio_context.destination);
 	//__log('Input connected to audio context destination.');
+	
 
 	recorder = new Recorder(input);
 }
@@ -34,6 +36,7 @@ function toggleRecord(button) {
 	{
 		recorder && recorder.stop();
 		uploadAudioData(button);
+		
 		recorder.clear();
 	}
 	else {

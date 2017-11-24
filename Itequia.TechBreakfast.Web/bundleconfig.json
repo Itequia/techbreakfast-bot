@@ -20,18 +20,7 @@
 		},
 		// Optionally generate .map file
 		"sourceMap": false
-	},
-	{
-		"outputFileName": "wwwroot/js/recorder.min.js",
-		"inputFiles": [
-			"wwwroot/js/recorder.js"
-		],
-		// Optionally specify minification options
-		"minify": {
-			"enabled": true,
-			"renameLocals": true
-		}
-	},
+	},	
 	{
 		"outputFileName": "wwwroot/js/voice.min.js",
 			"inputFiles": [

@@ -22,10 +22,5 @@
 </form>
 
 @section scripts {
-	<environment include="Development">
-		<script src="~/js/voice.js" asp-append-version="true"></script>
-	</environment>
-	<environment exclude="Development">
-		<script src="~/js/voice.min.js" asp-append-version="true"></script>
-	</environment>
+	<script src="~/js/voice.js" asp-append-version="true"></script>	
 }
