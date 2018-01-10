@@ -32,7 +32,7 @@ namespace Itequia.TechBreakfast.Web.Pages
             request.Method = "POST";
             request.ProtocolVersion = HttpVersion.Version11;
             request.ContentType = @"audio/wav; codec=audio/pcm; samplerate=16000";
-            request.Headers["Ocp-Apim-Subscription-Key"] = "8f3b5a5da78f43dba04a38e8f604c1a3";
+            request.Headers["Ocp-Apim-Subscription-Key"] = "ef224fc999cf4cf4b3d1134eaa22bcd3";
 
             using (Stream requestStream = request.GetRequestStream())
             {
